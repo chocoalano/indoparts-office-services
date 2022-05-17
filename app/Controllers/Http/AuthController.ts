@@ -161,4 +161,19 @@ export default class AuthController {
             return response.status(error.status).send(error.messages)
         }
     }
+    /*
+    |--------------------------------------------------------------------------
+    | LOGOUT::FUNCTION
+    |--------------------------------------------------------------------------
+    */
+    public async getAuthForm({ response }: HttpContextContract) {
+        try {
+            const data_jabatan=await Role.all()
+            const data_departemen=await Dept.all()
+            
+            return response.status(200).send({"jabatan":data_jabatan,"departemen":data_departemen})
+        } catch (error) {
+            return response.status(error.status).send(error.messages)
+        }
+    }
 }

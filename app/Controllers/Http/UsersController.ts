@@ -10,7 +10,7 @@ export default class UsersController {
             if (await bouncer.allows('read-user')) {
                 const page = request.input('page', 1)
                 const limit = request.input('limit', 1)
-                return await User.query().paginate(page, limit)
+                return await User.query().preload('roles').preload('dept').paginate(page, limit)
             }
         } catch (error) {
             return response.forbidden(error.messages)
@@ -86,18 +86,20 @@ export default class UsersController {
             */
             await bouncer.authorize("update-user")
             if (await bouncer.allows('update-user')) {
-                const payload = await request.validate(UserValidator)
-                await payload.avatar.move(Application.tmpPath('uploads/avatar-users'))
-                const user = await User.findOrFail(request.param('id'))
-                user.role_id=payload.role_id
-                user.dept_id=payload.dept_id
-                user.name=payload.name
-                user.nik=payload.nik
-                user.password=payload.password
-                user.activation=payload.activation
-                user.avatar=payload.avatar.fileName as string
-                await user.save()
-                return response.status(200).send("success")
+                console.log(request.all());
+                
+                // const payload = await request.validate(UserValidator)
+                // await payload.avatar.move(Application.tmpPath('uploads/avatar-users'))
+                // const user = await User.findOrFail(request.param('id'))
+                // user.role_id=payload.role_id
+                // user.dept_id=payload.dept_id
+                // user.name=payload.name
+                // user.nik=payload.nik
+                // user.password=payload.password
+                // user.activation=payload.activation
+                // user.avatar=payload.avatar.fileName as string
+                // await user.save()
+                // return response.status(200).send("success")
             }
         } catch (error) {
             return response.status(error.status).send(error.messages)

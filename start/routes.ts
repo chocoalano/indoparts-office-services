@@ -28,6 +28,7 @@ Route.group(() => {
   })
   Route.post("register", "AuthController.register");
   Route.post("login", "AuthController.login");
+  Route.get("data-auth-form", "AuthController.getAuthForm");
   Route.group(() => {
     Route.get("profile", "AuthController.profile");
     Route.post("profile-update", "AuthController.profileUpdate");
