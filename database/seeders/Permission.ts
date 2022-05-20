@@ -53,6 +53,22 @@ export default class PermissionSeeder extends BaseSeeder {
         name: 'delete-permission',
         basepermission: 'permission'
       },
+      {
+        name: 'create-dept',
+        basepermission: 'dept'
+      },
+      {
+        name: 'read-dept',
+        basepermission: 'dept'
+      },
+      {
+        name: 'update-dept',
+        basepermission: 'dept'
+      },
+      {
+        name: 'delete-dept',
+        basepermission: 'dept'
+      },
     ]
     await Permission.createMany(permissionname)
   }
