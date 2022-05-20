@@ -2,6 +2,7 @@ import Application from '@ioc:Adonis/Core/Application'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 import UserValidator from 'App/Validators/UserValidator'
+import Drive from '@ioc:Adonis/Core/Drive'
 export default class UsersController {
 
     public async index({ bouncer, response, request }: HttpContextContract) {
@@ -10,10 +11,17 @@ export default class UsersController {
             if (await bouncer.allows('read-user')) {
                 const page = request.input('page', 1)
                 const limit = request.input('limit', 1)
-                return await User.query().paginate(page, limit)
+                const sortDesc = request.input('sortDesc', false)
+                const search = request.input('search')
+                return await User.query().where('name', 'LIKE', '%'+search+'%').orderBy([
+                    {
+                        column: 'nik',
+                        order: sortDesc ? 'desc' : 'asc',
+                    }
+                ]).preload('roles').preload('dept').paginate(page, limit)
             }
         } catch (error) {
-            return response.forbidden(error.messages)
+            return response.status(error.status).send(error.messages)
         }
     }
 
@@ -37,18 +45,21 @@ export default class UsersController {
             await bouncer.authorize("create-user")
             if (await bouncer.allows('create-user')) {
                 const payload = await request.validate(UserValidator)
-                await payload.avatar.move(Application.tmpPath('uploads/avatar-users'))
-                console.log(payload);
+                await payload.avatar.move(Application.tmpPath('uploads/avatar-users'), {
+                    name: `${payload.nik}.jpg`,
+                    overwrite: true,
+                })
+
                 const user = new User()
-                user.role_id=payload.role_id
-                user.dept_id=payload.dept_id
-                user.name=payload.name
-                user.nik=payload.nik
-                user.password=payload.password
-                user.activation=payload.activation
-                user.avatar=payload.avatar.fileName as string
+                user.role_id = payload.role_id
+                user.dept_id = payload.dept_id
+                user.name = payload.name
+                user.nik = payload.nik
+                user.password = payload.password
+                user.activation = payload.activation
+                user.avatar = payload.avatar.fileName as string
                 await user.save()
-                return response.status(200).send("success")
+                return response.status(200).send('success')
             }
         } catch (error) {
             return response.status(error.status).send(error.messages)
@@ -87,15 +98,20 @@ export default class UsersController {
             await bouncer.authorize("update-user")
             if (await bouncer.allows('update-user')) {
                 const payload = await request.validate(UserValidator)
-                await payload.avatar.move(Application.tmpPath('uploads/avatar-users'))
                 const user = await User.findOrFail(request.param('id'))
-                user.role_id=payload.role_id
-                user.dept_id=payload.dept_id
-                user.name=payload.name
-                user.nik=payload.nik
-                user.password=payload.password
-                user.activation=payload.activation
-                user.avatar=payload.avatar.fileName as string
+                const filePath = Application.tmpPath(`uploads/avatar-users/${user.avatar}`)
+                await Drive.delete(filePath)
+                await payload.avatar.move(Application.tmpPath('uploads/avatar-users'), {
+                    name: `${payload.nik}.jpg`,
+                    overwrite: true,
+                })
+                user.role_id = payload.role_id
+                user.dept_id = payload.dept_id
+                user.name = payload.name
+                user.nik = payload.nik
+                user.password = payload.password
+                user.activation = payload.activation
+                user.avatar = payload.avatar.fileName as string
                 await user.save()
                 return response.status(200).send("success")
             }
@@ -109,8 +125,10 @@ export default class UsersController {
             await bouncer.authorize("delete-user")
             if (await bouncer.allows('delete-user')) {
                 const user = await User.findOrFail(request.param('id'))
+                const filePath = Application.tmpPath(`uploads/avatar-users/${user.avatar}`)
+                await Drive.delete(filePath)
                 await user.delete()
-                return response.status(200).send("success")
+                return response.status(200).send('success')
             }
         } catch (error) {
             return response.status(error.status).send(error.messages)

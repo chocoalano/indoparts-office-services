@@ -9,7 +9,14 @@ export default class RolesController {
             if (await bouncer.allows('read-role')) {
                 const page = request.input('page', 1)
                 const limit = request.input('limit', 1)
-                return await Role.query().paginate(page, limit)
+                const sortDesc = request.input('sortDesc', false)
+                const search = request.input('search')
+                return await Role.query().where('rolename', 'LIKE', '%'+search+'%').orderBy([
+                    {
+                        column: 'id',
+                        order: sortDesc ? 'desc' : 'asc',
+                    }
+                ]).paginate(page, limit)
             }
         } catch (error) {
             return response.badRequest(error.messages)

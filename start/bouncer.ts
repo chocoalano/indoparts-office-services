@@ -98,6 +98,19 @@ export const { actions } = Bouncer
 .define('delete-dept', (user: User) => {
     return permissionGuard(user.role_id, 'delete-dept')
 })
+// KELUHAN-GA AUTHORIZATION
+.define('create-keluhan-ga', (user: User) => {
+    return permissionGuard(user.role_id, 'create-keluhan-ga')
+})
+.define('read-keluhan-ga', (user: User) => {
+    return permissionGuard(user.role_id, 'read-keluhan-ga')
+})
+.define('update-keluhan-ga', (user: User) => {
+    return permissionGuard(user.role_id, 'update-keluhan-ga')
+})
+.define('delete-keluhan-ga', (user: User) => {
+    return permissionGuard(user.role_id, 'delete-keluhan-ga')
+})
 /*
 |--------------------------------------------------------------------------
 | Bouncer Policies

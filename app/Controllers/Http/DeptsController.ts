@@ -9,10 +9,17 @@ export default class DeptsController {
             if (await bouncer.allows('read-dept')) {
                 const page = request.input('page', 1)
                 const limit = request.input('limit', 1)
-                return await Dept.query().paginate(page, limit)
+                const sortDesc = request.input('sortDesc', false)
+                const search = request.input('search')
+                return await Dept.query().where('deptname', 'LIKE', '%'+search+'%').orderBy([
+                    {
+                        column: 'id',
+                        order: sortDesc ? 'desc' : 'asc',
+                    }
+                ]).paginate(page, limit)
             }
         } catch (error) {
-            return response.forbidden(error.messages)
+            return response.badRequest(error.messages)
         }
     }
 

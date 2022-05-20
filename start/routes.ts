@@ -28,13 +28,18 @@ Route.group(() => {
   })
   Route.post("register", "AuthController.register");
   Route.post("login", "AuthController.login");
+  Route.get("data-auth-form", "AuthController.getAuthForm");
   Route.group(() => {
     Route.get("profile", "AuthController.profile");
+    Route.get("list-user-login", "AuthController.list_login");
     Route.post("profile-update", "AuthController.profileUpdate");
     Route.post("logout", "AuthController.logout");
     Route.resource("users", "UsersController",).apiOnly();
     Route.resource("role", "RolesController",).apiOnly();
     Route.resource("permission", "PermissionsController",).apiOnly();
     Route.resource("dept", "DeptsController",).apiOnly();
+    Route.resource("role-permission", "SetRolePermissionsController",).apiOnly();
+    Route.resource("keluhan-ga", "KeluhanGasController",).apiOnly();
+    Route.get("role-permission-attr-form", "SetRolePermissionsController.attr_form");
   }).middleware("auth:api");
 }).prefix("api");

@@ -7,6 +7,8 @@ import User from 'App/Models/User';
 import LoginValidator from 'App/Validators/LoginValidator';
 import RegisterValidator from 'App/Validators/RegisterValidator';
 import UserValidator from 'App/Validators/UserValidator';
+import Ws from 'App/Services/Ws';
+import UserOnline from 'App/Models/UserOnline';
 
 export default class AuthController {
     /*
@@ -38,7 +40,11 @@ export default class AuthController {
             newUser.password = payload.password;
             newUser.activation = 'false';
             newUser.avatar = 'testing.png';
-            await newUser.save()
+            if (await newUser.save()) {
+                await newUser.related('user_online').create({
+                    online: 'true'
+                })
+            }
             const token = await auth.use("api").login(newUser, {
                 expiresIn: "1 days",
             });
@@ -58,13 +64,17 @@ export default class AuthController {
             |--------------------------------------------------------------------------
             | EXAMPLE REQUEST FORM
             |--------------------------------------------------------------------------
-                { nik: '001', password: '123456' }
+            { nik: '001', password: '123456' }
             |
             */
             const payload = await request.validate(LoginValidator)
-            const token = await auth.use("api").attempt(payload.nik,payload.password, {
+            const token = await auth.use("api").attempt(payload.nik, payload.password, {
                 expiresIn: "1 days",
             });
+            const searchPayload = { user_id: auth.user?.id }
+            const persistancePayload = { online: 'true' }
+            await UserOnline.updateOrCreate(searchPayload, persistancePayload)
+            Ws.io.emit('auth:user', { user: auth.user, state: 'islogin' })
             return response.status(200).send(token.toJSON())
         } catch (error) {
             return response.status(error.status).send(error.messages)
@@ -131,13 +141,13 @@ export default class AuthController {
             const payload = await request.validate(UserValidator)
             await payload.avatar.move(Application.tmpPath('uploads/avatar-users'))
             const user = await User.findOrFail(auth.user?.id)
-            user.role_id=payload.role_id
-            user.dept_id=payload.dept_id
-            user.name=payload.name
-            user.nik=payload.nik
-            user.password=payload.password
-            user.activation=payload.activation
-            user.avatar=payload.avatar.fileName as string
+            user.role_id = payload.role_id
+            user.dept_id = payload.dept_id
+            user.name = payload.name
+            user.nik = payload.nik
+            user.password = payload.password
+            user.activation = payload.activation
+            user.avatar = payload.avatar.fileName as string
             await user.save()
             return response.status(200).send("success")
         } catch (error) {
@@ -152,11 +162,44 @@ export default class AuthController {
     public async logout({ auth, response }: HttpContextContract) {
         try {
             if (await auth.check()) {
+                const searchPayload = { user_id: auth.user?.id }
+                const persistancePayload = { online: 'false' }
+                await UserOnline.updateOrCreate(searchPayload, persistancePayload)
+
+                Ws.io.emit('auth:user', { user: auth.user, state: 'islogout' })
                 auth.use("api").logout()
             }
             const msg = (await auth.check()) ? 'Success logout' : 'Invalid Credential'
             const status = (await auth.check()) ? 200 : 401
             return response.status(status).send(msg)
+        } catch (error) {
+            return response.status(error.status).send(error.messages)
+        }
+    }
+    /*
+   |--------------------------------------------------------------------------
+   | ATTR AUTH FORM::FUNCTION
+   |--------------------------------------------------------------------------
+   */
+    public async getAuthForm({ response }: HttpContextContract) {
+        try {
+            const data_jabatan = await Role.all()
+            const data_departemen = await Dept.all()
+            const user = await User.all()
+            return response.status(200).send({ "jabatan": data_jabatan, "departemen": data_departemen, "user": user })
+        } catch (error) {
+            return response.status(error.status).send(error.messages)
+        }
+    }
+    /*
+   |--------------------------------------------------------------------------
+   | LIST USER LOGIN::FUNCTION
+   |--------------------------------------------------------------------------
+   */
+    public async list_login({ response }: HttpContextContract) {
+        try {
+            const data = await UserOnline.query().where('online', 'true').preload('user_online')
+            return response.status(200).send(data)
         } catch (error) {
             return response.status(error.status).send(error.messages)
         }
