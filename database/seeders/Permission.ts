@@ -69,6 +69,22 @@ export default class PermissionSeeder extends BaseSeeder {
         name: 'delete-dept',
         basepermission: 'dept'
       },
+      {
+        name: 'create-create-keluhan-ga',
+        basepermission: 'create-keluhan-ga'
+      },
+      {
+        name: 'read-create-keluhan-ga',
+        basepermission: 'create-keluhan-ga'
+      },
+      {
+        name: 'update-create-keluhan-ga',
+        basepermission: 'create-keluhan-ga'
+      },
+      {
+        name: 'delete-create-keluhan-ga',
+        basepermission: 'create-keluhan-ga'
+      },
     ]
     await Permission.createMany(permissionname)
   }

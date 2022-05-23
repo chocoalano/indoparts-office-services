@@ -7,7 +7,6 @@ import User from 'App/Models/User';
 import LoginValidator from 'App/Validators/LoginValidator';
 import RegisterValidator from 'App/Validators/RegisterValidator';
 import UserValidator from 'App/Validators/UserValidator';
-import Ws from 'App/Services/Ws';
 import UserOnline from 'App/Models/UserOnline';
 
 export default class AuthController {
@@ -74,10 +73,11 @@ export default class AuthController {
             const searchPayload = { user_id: auth.user?.id }
             const persistancePayload = { online: 'true' }
             await UserOnline.updateOrCreate(searchPayload, persistancePayload)
-            Ws.io.emit('auth:user', { user: auth.user, state: 'islogin' })
             return response.status(200).send(token.toJSON())
         } catch (error) {
-            return response.status(error.status).send(error.messages)
+            console.log(error);
+            
+            // return response.status(error.status).send(error.messages)
         }
     }
     /*
@@ -165,8 +165,6 @@ export default class AuthController {
                 const searchPayload = { user_id: auth.user?.id }
                 const persistancePayload = { online: 'false' }
                 await UserOnline.updateOrCreate(searchPayload, persistancePayload)
-
-                Ws.io.emit('auth:user', { user: auth.user, state: 'islogout' })
                 auth.use("api").logout()
             }
             const msg = (await auth.check()) ? 'Success logout' : 'Invalid Credential'

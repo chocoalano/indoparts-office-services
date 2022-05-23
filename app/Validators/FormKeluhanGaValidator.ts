@@ -11,10 +11,6 @@ export default class FormKeluhanGaValidator extends Messages{
     role_id: schema.number(),
     dept_id: schema.number(),
     notes: schema.string(),
-    image: schema.file({
-      size: '2mb',
-      extnames: ['jpg', 'png'],
-    }),
     status: schema.enum(['true', 'false']),
     agree: schema.enum(['true', 'false']),
   })

@@ -40,6 +40,8 @@ Route.group(() => {
     Route.resource("dept", "DeptsController",).apiOnly();
     Route.resource("role-permission", "SetRolePermissionsController",).apiOnly();
     Route.resource("keluhan-ga", "KeluhanGasController",).apiOnly();
+    Route.resource("notification", "NotificationsController",).apiOnly();
     Route.get("role-permission-attr-form", "SetRolePermissionsController.attr_form");
+    Route.get("count-notif", "NotificationsController.count");
   }).middleware("auth:api");
 }).prefix("api");

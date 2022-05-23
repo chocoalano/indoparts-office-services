@@ -69,6 +69,22 @@ export default class RoleHasPermissionSeeder extends BaseSeeder {
         role_id: 1,
         permission_id: 16,
       },
+      {
+        role_id: 1,
+        permission_id: 17,
+      },
+      {
+        role_id: 1,
+        permission_id: 18,
+      },
+      {
+        role_id: 1,
+        permission_id: 19,
+      },
+      {
+        role_id: 1,
+        permission_id: 20,
+      },
     ]
     await RoleHasPermission.createMany(permissionname)
   }

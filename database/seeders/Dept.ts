@@ -6,6 +6,9 @@ export default class DeptSeeder extends BaseSeeder {
     // Write your database queries inside the run method
     await Dept.createMany([
       {
+        deptname: 'ALL'
+      },
+      {
         deptname: 'IT'
       },
       {

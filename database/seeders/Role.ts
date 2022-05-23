@@ -9,6 +9,9 @@ export default class RoleSeeder extends BaseSeeder {
         rolename: 'Superadmin'
       },
       {
+        rolename: 'Direktur'
+      },
+      {
         rolename: 'Manager'
       },
       {
